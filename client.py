@@ -87,8 +87,8 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  
 # Define the port on which you want to connect
 #host = '187.189.20.216'
-host = 'localhost'
-port = 9998           
+host = '187.190.93.242'
+port = 9009           
  
 # connect to the server on local computer
 s.connect((host, port))
