@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-
-# first of all import the socket library
 import socket
 
 
@@ -42,17 +39,17 @@ def mod2div(dividendo, divisor):
     return checkword
 
 
-def decodeData(data, key):
+def decodificarDatos(data, key):
     l_key = len(key)
 
     appended_data = data + '0' * (l_key - 1)
-    remainder = mod2div(appended_data, key)
+    resto = mod2div(appended_data, key)
 
     # Return the remainder
-    return remainder
+    return resto
     '''
-    print("Remainder : ", remainder)
-    print("Encoded Data (Data + Remainder) : ",
+    print("Resto : ", resto)
+    print("Datos codificados (Data + Resto) : ",
           codeword)
     '''
 
@@ -61,11 +58,11 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print ("La creación del socket fue exitosa")
 
 #Elegir puerto y host para servidor
-puerto = 9010
+puerto = 9009
 host = 'localhost'
 
 s.bind((host, puerto))
-print ("socket binded to %s" % (puerto))
+print ("socket creado en el puerto %s" % (puerto))
 #Iniciar el socket para esperar datos
 s.listen(5)
 print ("socket esperando")
@@ -86,8 +83,8 @@ while True:
 
     llave = "1001"
 
-    ans = decodeData(datos, llave)
-    print("Remainder after decoding is->"+ans)
+    ans = decodificarDatos(datos, llave)
+    print("Resto despues de la decodificacion->"+ans)
     
     #Si en remainder todos son 0, entonces no ha ocurrido ningun error
     temp = "0" * (len(llave) - 1)

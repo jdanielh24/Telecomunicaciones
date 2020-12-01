@@ -1,4 +1,3 @@
-# Import socket module
 import socket               
  
 
@@ -87,7 +86,7 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  
 # Define the port on which you want to connect
 #host = '187.189.20.216'
-host = '187.190.93.242'
+host = '189.145.123.53'
 port = 9009           
  
 # connect to the server on local computer
