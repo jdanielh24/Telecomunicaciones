@@ -1,55 +1,42 @@
-# Import socket module
+# Importar modulo de socket
 import socket               
  
 
 
 def xor(a, b):
  
-    # initialize result
-    result = []
+    # inicializar resultado
+    resultado = []
  
-    # Traverse all bits, if bits are
-    # same, then XOR is 0, else 1
+    # Recorrer todos los bits, si los bits son iguales
+    # entonces XOR es 0, sino 1
     for i in range(1, len(b)):
         if a[i] == b[i]:
-            result.append('0')
+            resultado.append('0')
         else:
-            result.append('1')
+            resultado.append('1')
  
-    return ''.join(result)
+    return ''.join(resultado)
  
  
-# Performs Modulo-2 division
+# Realizar division Modulo-2 
 def mod2div(divident, divisor):
- 
-    # Number of bits to be XORed at a time.
+    
     pick = len(divisor)
  
-    # Slicing the divident to appropriate
-    # length for particular step
     tmp = divident[0 : pick]
  
     while pick < len(divident):
  
         if tmp[0] == '1':
  
-            # replace the divident by the result
-            # of XOR and pull 1 bit down
             tmp = xor(divisor, tmp) + divident[pick]
  
-        else:   # If leftmost bit is '0'
-            # If the leftmost bit of the dividend (or the
-            # part used in each step) is 0, the step cannot
-            # use the regular divisor; we need to use an
-            # all-0s divisor.
+        else:  
             tmp = xor('0'*pick, tmp) + divident[pick]
  
-        # increment pick to move further
         pick += 1
  
-    # For the last n bits, we have to carry it out
-    # normally as increased value of pick will cause
-    # Index Out of Bounds.
     if tmp[0] == '1':
         tmp = xor(divisor, tmp)
     else:
@@ -58,18 +45,13 @@ def mod2div(divident, divisor):
     checkword = tmp
     return checkword
  
-# Function used at the sender side to encode
-# data by appending remainder of modular divison
-# at the end of data.
 def encodeData(data, key):
  
     l_key = len(key)
  
-    # Appends n-1 zeroes at end of data
     appended_data = data + '0'*(l_key-1)
     remainder = mod2div(appended_data, key)
- 
-    # Append remainder in the original data
+
     codeword = data + remainder
     return codeword    
     '''
@@ -80,36 +62,31 @@ def encodeData(data, key):
 
 
 
-
-
-# Create a socket object
+# Crear objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         
  
-# Define the port on which you want to connect
+# Definir la ip del servidor y el puerto al que se conectara
 #host = '187.189.20.216'
 host = 'localhost'
-port = 9998           
+puerto = 9999           
  
-# connect to the server on local computer
-s.connect((host, port))
+# conectar con el servidor
+s.connect((host, puerto))
 
-# Send data to server 'Hello world'
-
-## s.sendall('Hello World')
-
-input_string = input("Enter data you want to send->")
+# guardar datos de entrada del usuario
+info = input("Ingresa los datos que quieres enviar->")
 #s.sendall(input_string)
-data =(''.join(format(ord(x), 'b') for x in input_string))
-print (data)
-key = "1001"
+datos =(''.join(format(ord(x), 'b') for x in info))
+print (datos)
+llave = "1001"
 
-ans = encodeData(data,key)
+ans = encodeData(datos,llave)
 print(ans)
 s.sendall(ans.encode('utf-8'))
 
 
-# receive data from the server
+# Recibir datos del servidor
 print (s.recv(1024).decode('utf-8'))
 
-# close the connection
+# Cerrar la conexion
 s.close()
