@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 # Importar modulo de socket
-=======
->>>>>>> 4b99b739739d51f4b370a666dd168079d1cb8ecf
 import socket               
  
 
@@ -70,8 +67,8 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
  
 # Definir la ip del servidor y el puerto al que se conectara
 #host = '187.189.20.216'
-host = 'localhost'
-puerto = 9999           
+host = '96.126.114.57'
+puerto = 5555           
  
 # conectar con el servidor
 s.connect((host, puerto))

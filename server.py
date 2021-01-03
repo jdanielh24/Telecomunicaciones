@@ -58,8 +58,8 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print ("La creación del socket fue exitosa")
 
 #Elegir puerto y host para servidor
-puerto = 9009
-host = 'localhost'
+puerto = 5555
+host = ''
 
 s.bind((host, puerto))
 print ("socket creado en el puerto %s" % (puerto))
