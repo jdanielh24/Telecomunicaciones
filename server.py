@@ -13,7 +13,6 @@ def xor(a, b):
     return ''.join(resultado)
 
 
-
 def mod2div(dividendo, divisor):
     pick = len(divisor)
 
@@ -25,7 +24,7 @@ def mod2div(dividendo, divisor):
 
             tmp = xor(divisor, tmp) + dividendo[pick]
 
-        else: 
+        else:
             tmp = xor('0' * pick, tmp) + dividendo[pick]
 
         pick += 1
@@ -53,30 +52,35 @@ def decodificarDatos(data, key):
           codeword)
     '''
 
-#Creacion de socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print ("La creación del socket fue exitosa")
 
-#Elegir puerto y host para servidor
+# Creacion de socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+print("La creación del socket fue exitosa")
+
+# Elegir puerto y host para servidor
 puerto = 5555
 host = ''
+# host = 'localhost'
 
 s.bind((host, puerto))
-print ("socket creado en el puerto %s" % (puerto))
-#Iniciar el socket para esperar datos
+print("socket creado en el puerto %s" % (puerto))
+# Iniciar el socket para esperar datos
 s.listen(5)
-print ("socket esperando")
+print("socket esperando")
 
 
 while True:
-    #Establecer conexion con cliente
+    # Establecer conexion con cliente
     c, addr = s.accept()
     print('Conexion obtenida de', addr)
-    
-    #obtener datos de cliente
+
+    # obtener datos de cliente codificados (binarios)
     datos = c.recv(1024).decode('utf-8')
-    
-    print(datos)
+    # obtener datos de cliente como cadena de texto
+    datos2 = c.recv(1024).decode('utf-8')
+
+    print('\ntexto recibido: \n' + datos2)
+    print('\ndecodificacion: \n' + datos + '\n')
 
     if not datos:
         break
@@ -85,11 +89,12 @@ while True:
 
     ans = decodificarDatos(datos, llave)
     print("Resto despues de la decodificacion->"+ans)
-    
-    #Si en remainder todos son 0, entonces no ha ocurrido ningun error
+
+    # Si en remainder todos son 0, entonces no ha ocurrido ningun error
     temp = "0" * (len(llave) - 1)
     if ans == temp:
-        c.sendall(("Dato enviado ->"+datos + " Recibido sin errores FOUND").encode('utf-8'))
+        c.sendall(("Dato enviado ->"+datos +
+                   " Recibido sin errores FOUND").encode('utf-8'))
     else:
         c.sendall(("Error").encode('utf-8'))
 
