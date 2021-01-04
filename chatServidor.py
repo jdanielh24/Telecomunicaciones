@@ -26,7 +26,7 @@ class Server:
         while True:
             c, addr = self.s.accept()
 
-            username = c.recv(1024).decode()
+            username = c.recv(1024).decode('utf-8')
 
             print('New connection. Username: '+str(username))
             self.broadcast('New person joined the room. Username: '+username)
@@ -40,7 +40,7 @@ class Server:
 
     def broadcast(self, msg):
         for connection in self.clients:
-            connection.send(msg.encode())
+            connection.send(msg.encode('utf-8'))
 
     def handle_client(self, c, addr):
         while True:
@@ -57,13 +57,23 @@ class Server:
 
                     break
 
-                if msg.decode() != '':
-                    print('New message: '+str(msg.decode()))
+                contenido = msg.decode('utf-8')
+                if 'QUIT' in contenido:
+                    c.shutdown(socket.SHUT_RDWR)
+                    self.clients.remove(c)
+
+                    print(str(self.username_lookup[c])+' left the room.')
+                    self.broadcast(
+                        str(self.username_lookup[c])+' has left the room.')
+                    break
+
+                if msg.decode('utf-8') != '':
+                    print('New message: '+str(msg.decode('utf-8')))
                     for connection in self.clients:
                         if connection != c:
                             connection.send(msg)
             except:
-                print('error al manejar el error de arriba :v')
+                print('Error en la conexión. Intena de nuevo en unos momentos')
                 self.clients.remove(c)
 
 
