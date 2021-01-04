@@ -64,6 +64,7 @@ class Server:
                             connection.send(msg)
             except:
                 print('error al manejar el error de arriba :v')
+                self.clients.pop()
 
 
 server = Server()
