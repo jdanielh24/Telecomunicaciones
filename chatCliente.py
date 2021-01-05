@@ -29,7 +29,7 @@ class Client:
 
     def mensajes(self):
         while 1:
-            print(self.sock.recv(1204).decode('utf-8'))
+            print(self.sock.recv(1024).decode('utf-8'))
 
     def entrada(self):
         while 1:

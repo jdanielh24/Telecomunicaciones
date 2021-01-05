@@ -72,7 +72,7 @@ class Server:
                         if conexion != c:
                             conexion.send(mensaje)
             except:
-                print('Error en la conexión. Intena de nuevo en unos momentos')
+                print('')
                 self.clientes.remove(c)
 
 
