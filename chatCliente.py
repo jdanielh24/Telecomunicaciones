@@ -3,36 +3,36 @@ import threading
 
 class Client:
     def __init__(self):
-        self.create_connection()
+        self.crearConexion()
 
-    def create_connection(self):
-        self.s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+    def crearConexion(self):
+        self.sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         
         while 1:
             try:
                 host = '96.126.114.57'
                 port = 5555
-                self.s.connect((host,port))
+                self.sock.connect((host,port))
                 
                 break
             except:
-                print("Couldn't connect to server")
+                print("No se pudo conectar con el servidor")
 
-        self.username = input('Enter username --> ')
-        self.s.send(self.username.encode('utf-8'))
+        self.nombre = input('Ingresa el nombre de usuario--> ')
+        self.sock.send(self.nombre.encode('utf-8'))
         
-        message_handler = threading.Thread(target=self.handle_messages,args=())
-        message_handler.start()
+        mensaje = threading.Thread(target=self.mensajes,args=())
+        mensaje.start()
 
-        input_handler = threading.Thread(target=self.input_handler,args=())
-        input_handler.start()
+        entrada = threading.Thread(target=self.entrada,args=())
+        entrada.start()
 
-    def handle_messages(self):
+    def mensajes(self):
         while 1:
-            print(self.s.recv(1204).decode('utf-8'))
+            print(self.sock.recv(1204).decode('utf-8'))
 
-    def input_handler(self):
+    def entrada(self):
         while 1:
-            self.s.send((self.username+' - '+input()).encode('utf-8'))
+            self.sock.send((self.nombre+' - '+input()).encode('utf-8'))
 
 client = Client()

@@ -4,77 +4,76 @@ import threading
 
 class Server:
     def __init__(self):
-        self.start_server()
+        self.iniciarServidor()
 
-    def start_server(self):
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def iniciarServidor(self):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         host = ''
-        port = 5555
-        #port = int(input('Enter port to run the server on --> '))
+        puerto = 5555  
 
-        self.clients = []
+        self.clientes = []
 
-        self.s.bind((host, port))
-        self.s.listen(100)
+        self.sock.bind((host, puerto))
+        self.sock.listen(100)
 
-        print('Running on host: '+str(host))
-        print('Running on port: '+str(port))
+        print('Corriendo en el host: '+str(host))
+        print('Corriendo en el puerto: '+str(puerto))
 
-        self.username_lookup = {}
+        self.usuarios_chat = {}
 
         while True:
-            c, addr = self.s.accept()
+            c, direccion = self.sock.accept()
 
-            username = c.recv(1024).decode('utf-8')
+            usuario = c.recv(1024).decode('utf-8')
 
-            print('New connection. Username: '+str(username))
-            self.broadcast('New person joined the room. Username: '+username)
+            print('Nueva conexion, usuario: '+str(usuario))
+            self.transmitir('Se ha unido un nuevo usuario. usuario: '+usuario)
 
-            self.username_lookup[c] = username
+            self.usuarios_chat[c] = usuario
 
-            self.clients.append(c)
+            self.clientes.append(c)
 
-            threading.Thread(target=self.handle_client,
-                             args=(c, addr,)).start()
+            threading.Thread(target=self.clientes_chat,
+                             args=(c, direccion,)).start()
 
-    def broadcast(self, msg):
-        for connection in self.clients:
-            connection.send(msg.encode('utf-8'))
+    def transmitir(self, mensaje):
+        for conexion in self.clientes:
+            conexion.send(mensaje.encode('utf-8'))
 
-    def handle_client(self, c, addr):
+    def clientes_chat(self, c, direccion):
         while True:
             try:
                 try:
-                    msg = c.recv(1024)
+                    mensaje = c.recv(1024)
                 except:
                     c.shutdown(socket.SHUT_RDWR)
-                    self.clients.remove(c)
+                    self.clientes.remove(c)
 
-                    print(str(self.username_lookup[c])+' left the room.')
-                    self.broadcast(
-                        str(self.username_lookup[c])+' has left the room.')
+                    print(str(self.usuarios_chat[c])+' abandono el chat.')
+                    self.transmitir(
+                        str(self.usuarios_chat[c])+' abandono el chat.')
 
                     break
 
-                contenido = msg.decode('utf-8')
-                if 'QUIT' in contenido:
+                contenido = mensaje.decode('utf-8')
+                if 'SALIR' in contenido:
                     c.shutdown(socket.SHUT_RDWR)
-                    self.clients.remove(c)
+                    self.clientes.remove(c)
 
-                    print(str(self.username_lookup[c])+' left the room.')
-                    self.broadcast(
-                        str(self.username_lookup[c])+' has left the room.')
+                    print(str(self.usuarios_chat[c])+' abandono el chat')
+                    self.transmitir(
+                        str(self.usuarios_chat[c])+' abandono el chat.')
                     break
 
-                if msg.decode('utf-8') != '':
-                    print('New message: '+str(msg.decode('utf-8')))
-                    for connection in self.clients:
-                        if connection != c:
-                            connection.send(msg)
+                if mensaje.decode('utf-8') != '':
+                    print('Nuevo mensaje: '+str(mensaje.decode('utf-8')))
+                    for conexion in self.clientes:
+                        if conexion != c:
+                            conexion.send(mensaje)
             except:
                 print('Error en la conexión. Intena de nuevo en unos momentos')
-                self.clients.remove(c)
+                self.clientes.remove(c)
 
 
 server = Server()
