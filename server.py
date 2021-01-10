@@ -93,12 +93,7 @@ while True:
     # Si en remainder todos son 0, entonces no ha ocurrido ningun error
     temp = "0" * (len(llave) - 1)
     if ans == temp:
-<<<<<<< HEAD
-        c.sendall(("Dato enviado ->"+datos +
-                   " Recibido sin errores FOUND").encode('utf-8'))
-=======
         c.sendall(("Dato enviado ->"+datos + " Recibido sin errores encontrados").encode('utf-8'))
->>>>>>> ramaJA
     else:
         c.sendall(("Error").encode('utf-8'))
 
