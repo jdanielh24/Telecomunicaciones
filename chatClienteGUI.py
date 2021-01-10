@@ -68,8 +68,8 @@ class Receive(threading.Thread):
 
                 if self.messages:
                     self.messages.insert(tk.END, message)
-                    print('hi')
-                    print('\r{}\n{}: '.format(message, self.name), end = '')
+                    # print('hi')
+                    # print('\r{}\n{}: '.format(message, self.name), end = '')
                 
                 else:
                     # Thread has started, but client GUI is not yet ready
