@@ -92,7 +92,7 @@ class ServerSocket(threading.Thread):
         from the list of ServerSocket threads in the parent Server thread.
         """
         while True:
-            message = self.sc.recv(1024).decode('ascii')
+            message = self.sc.recv(1024).decode('utf-8')
             if message:
                 print('{} says {!r}'.format(self.sockname, message))
                 self.server.broadcast(message, self.sockname)
@@ -109,7 +109,7 @@ class ServerSocket(threading.Thread):
         Args:
             message (str): The message to be sent.
         """
-        self.sc.sendall(message.encode('ascii'))
+        self.sc.sendall(message.encode('utf-8'))
 
 
 def exit(server):

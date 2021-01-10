@@ -30,12 +30,12 @@ class Send(threading.Thread):
 
             # Type 'QUIT' to leave the chatroom
             if message == 'SALIR':
-                self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.name).encode('ascii'))
+                self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.name).encode('utf-8'))
                 break
             
             # Send message to server for broadcasting
             else:
-                self.sock.sendall('{}: {}'.format(self.name, message).encode('ascii'))
+                self.sock.sendall('{}: {}'.format(self.name, message).encode('utf-8'))
         
         print('\nSaliendo...')
         self.sock.close()
@@ -62,7 +62,7 @@ class Receive(threading.Thread):
         Always listens for incoming data until either end has closed the socket.
         """
         while True:
-            message = self.sock.recv(1024).decode('ascii')
+            message = self.sock.recv(1024).decode('utf-8')
 
             if message:
 
@@ -124,7 +124,7 @@ class Client:
         send.start()
         receive.start()
 
-        self.sock.sendall('Servidor: {} ha entrado al chat. Di hola!'.format(self.name).encode('ascii'))
+        self.sock.sendall('Servidor: {} ha entrado al chat. Di hola!'.format(self.name).encode('utf-8'))
         print("\rTodo listo! deja la sala escribiendo 'SALIR'\n")
         print('{}: '.format(self.name), end = '')
 
@@ -144,7 +144,7 @@ class Client:
 
         # Type 'QUIT' to leave the chatroom
         if message == 'SALIR':
-            self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.name).encode('ascii'))
+            self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.name).encode('utf-8'))
             
             print('\nSaliendo...')
             self.sock.close()
@@ -152,7 +152,7 @@ class Client:
         
         # Send message to server for broadcasting
         else:
-            self.sock.sendall('{}: {}'.format(self.name, message).encode('ascii'))
+            self.sock.sendall('{}: {}'.format(self.name, message).encode('utf-8'))
 
 
 def main():
