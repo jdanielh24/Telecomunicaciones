@@ -12,12 +12,13 @@ class Server(threading.Thread):
         host (str): The IP address of the listening socket.
         port (int): The port number of the listening socket.
     """
+
     def __init__(self, host, port):
         super().__init__()
         self.connections = []
         self.host = host
         self.port = port
-    
+
     def run(self):
         """
         Creates the listening socket. The listening socket will use the SO_REUSEADDR option to
@@ -37,11 +38,12 @@ class Server(threading.Thread):
 
             # Accept new connection
             sc, sockname = sock.accept()
-            print('Accepted a new connection from {} to {}'.format(sc.getpeername(), sc.getsockname()))
+            print('Accepted a new connection from {} to {}'.format(
+                sc.getpeername(), sc.getsockname()))
 
             # Create new thread
             server_socket = ServerSocket(sc, sockname, self)
-            
+
             # Start new thread
             server_socket.start()
 
@@ -61,7 +63,7 @@ class Server(threading.Thread):
             # Send to all connected clients except the source client
             if connection.sockname != source:
                 connection.send(message)
-    
+
     def remove_connection(self, connection):
         """
         Removes a ServerSocket thread from the connections attribute.
@@ -79,12 +81,13 @@ class ServerSocket(threading.Thread):
         sockname (tuple): The client socket address.
         server (Server): The parent thread.
     """
+
     def __init__(self, sc, sockname, server):
         super().__init__()
         self.sc = sc
         self.sockname = sockname
         self.server = server
-    
+
     def run(self):
         """
         Receives data from the connected client and broadcasts the message to all other clients.
@@ -92,17 +95,20 @@ class ServerSocket(threading.Thread):
         from the list of ServerSocket threads in the parent Server thread.
         """
         while True:
-            message = self.sc.recv(1024).decode('utf-8')
-            if message:
-                print('{} says {!r}'.format(self.sockname, message))
-                self.server.broadcast(message, self.sockname)
-            else:
-                # Client has closed the socket, exit the thread
-                print('{} has closed the connection'.format(self.sockname))
-                self.sc.close()
-                server.remove_connection(self)
-                return
-    
+            try:
+                message = self.sc.recv(1024).decode('utf-8')
+                if message:
+                    print('{} says {!r}'.format(self.sockname, message))
+                    self.server.broadcast(message, self.sockname)
+                else:
+                    # Client has closed the socket, exit the thread
+                    print('{} has closed the connection'.format(self.sockname))
+                    self.sc.close()
+                    server.remove_connection(self)
+                    return
+            except:
+                print('error cuando kike se salio')
+
     def send(self, message):
         """
         Sends a message to the connected server.
@@ -130,7 +136,7 @@ def exit(server):
 if __name__ == '__main__':
     #parser = argparse.ArgumentParser(description='Chatroom Server')
     #parser.add_argument('host', help='Interface the server listens at')
-    #parser.add_argument('-p', metavar='PORT', type=int, default=5555,
+    # parser.add_argument('-p', metavar='PORT', type=int, default=5555,
     #                    help='TCP port (default 1060)')
     #args = parser.parse_args()
 
@@ -138,5 +144,5 @@ if __name__ == '__main__':
     server = Server('96.126.114.57', 5555)
     server.start()
 
-    exit = threading.Thread(target = exit, args = (server,))
+    exit = threading.Thread(target=exit, args=(server,))
     exit.start()
