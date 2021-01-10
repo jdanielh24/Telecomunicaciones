@@ -128,14 +128,14 @@ def exit(server):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Chatroom Server')
-    parser.add_argument('host', help='Interface the server listens at')
-    parser.add_argument('-p', metavar='PORT', type=int, default=5555,
-                        help='TCP port (default 1060)')
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser(description='Chatroom Server')
+    #parser.add_argument('host', help='Interface the server listens at')
+    #parser.add_argument('-p', metavar='PORT', type=int, default=5555,
+    #                    help='TCP port (default 1060)')
+    #args = parser.parse_args()
 
     # Create and start server thread
-    server = Server('127.0.0.1', 5555)
+    server = Server('96.126.114.57', 5555)
     server.start()
 
     exit = threading.Thread(target = exit, args = (server,))

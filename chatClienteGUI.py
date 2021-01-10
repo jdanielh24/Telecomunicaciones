@@ -155,13 +155,16 @@ class Client:
             self.sock.sendall('{}: {}'.format(self.name, message).encode('ascii'))
 
 
-def main(host, port):
+def main():
     """
     Initializes and runs the GUI application.
     Args:
         host (str): The IP address of the server's listening socket.
         port (int): The port number of the server's listening socket.
     """
+    host = '96.126.114.57'
+    port = 5555
+
     client = Client(host, port)
     receive = client.start()
 
@@ -206,10 +209,10 @@ def main(host, port):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Chat4Telecom')
-    parser.add_argument('host', help='El servidor esta escuchando en:')
-    parser.add_argument('-p', metavar='PORT', type=int, default=5555,
-                        help='TCP port (default 1060)')
-    args = parser.parse_args()
+    #parser = argparse.ArgumentParser(description='Chat4Telecom')
+    #parser.add_argument('host', help='El servidor esta escuchando en:')
+    #parser.add_argument('-p', metavar='PORT', type=int, default=5555,
+                        #help='TCP port (default 1060)')
+    #args = parser.parse_args()
 
-    main(args.host, args.p)
+    main()
