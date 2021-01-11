@@ -56,7 +56,7 @@ class ServerSocket(threading.Thread):
     def run(self):
  
         while True:
-            try:
+            
                 mensaje = self.sc.recv(1024).decode('utf-8')
                 if mensaje:
                     print('{} dice {!r}'.format(self.socknombre, mensaje))
@@ -66,8 +66,7 @@ class ServerSocket(threading.Thread):
                     self.sc.close()
                     server.remove_connection(self)
                     return
-            except:
-                print('error cuando kike se salio')
+    
 
     def send(self, mensaje):
 
