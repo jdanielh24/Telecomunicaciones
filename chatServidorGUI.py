@@ -32,13 +32,13 @@ class Server(threading.Thread):
         sock.bind((self.host, self.port))
 
         sock.listen(1)
-        print('Listening at', sock.getsockname())
+        print('Escuchando en:', sock.getsockname())
 
         while True:
 
             # Accept new connection
             sc, sockname = sock.accept()
-            print('Accepted a new connection from {} to {}'.format(
+            print('Nueva conexion de: {} a {}'.format(
                 sc.getpeername(), sc.getsockname()))
 
             # Create new thread
@@ -49,7 +49,7 @@ class Server(threading.Thread):
 
             # Add thread to active connections
             self.connections.append(server_socket)
-            print('Ready to receive messages from', sc.getpeername())
+            print('Listo para recibir mensajes de ', sc.getpeername())
 
     def broadcast(self, message, source):
         """
@@ -98,11 +98,11 @@ class ServerSocket(threading.Thread):
             try:
                 message = self.sc.recv(1024).decode('utf-8')
                 if message:
-                    print('{} says {!r}'.format(self.sockname, message))
+                    print('{} dijo {!r}'.format(self.sockname, message))
                     self.server.broadcast(message, self.sockname)
                 else:
                     # Client has closed the socket, exit the thread
-                    print('{} has closed the connection'.format(self.sockname))
+                    print('{} salio del chat'.format(self.sockname))
                     self.sc.close()
                     server.remove_connection(self)
                     return
@@ -126,10 +126,10 @@ def exit(server):
     while True:
         ipt = input('')
         if ipt == 'q':
-            print('Closing all connections...')
+            print('Cerrando todas las conexiones..')
             for connection in server.connections:
                 connection.sc.close()
-            print('Shutting down the server...')
+            print('Apagando servidor...')
             os._exit(0)
 
 
