@@ -5,144 +5,91 @@ import os
 
 
 class Server(threading.Thread):
-    """
-    Supports management of server connections.
-    Attributes:
-        connections (list): A list of ServerSocket objects representing the active connections.
-        host (str): The IP address of the listening socket.
-        port (int): The port number of the listening socket.
-    """
 
-    def __init__(self, host, port):
+    def __init__(self, host, puerto):
         super().__init__()
-        self.connections = []
+        self.conexiones = []
         self.host = host
-        self.port = port
+        self.puerto = puerto
 
     def run(self):
-        """
-        Creates the listening socket. The listening socket will use the SO_REUSEADDR option to
-        allow binding to a previously-used socket address. This is a small-scale application which
-        only supports one waiting connection at a time. 
-        For each new connection, a ServerSocket thread is started to facilitate communications with
-        that particular client. All ServerSocket objects are stored in the connections attribute.
-        """
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        sock.bind((self.host, self.port))
+        sock.bind((self.host, self.puerto))
 
         sock.listen(1)
-        print('Listening at', sock.getsockname())
+        print('Escuchando:', sock.getsockname())
 
         while True:
 
-            # Accept new connection
-            sc, sockname = sock.accept()
-            print('Accepted a new connection from {} to {}'.format(
+            sc, socknombre = sock.accept()
+            print('Nueva conexion de {} a {}'.format(
                 sc.getpeername(), sc.getsockname()))
 
-            # Create new thread
-            server_socket = ServerSocket(sc, sockname, self)
-
-            # Start new thread
+            server_socket = ServerSocket(sc, socknombre, self)
             server_socket.start()
 
-            # Add thread to active connections
-            self.connections.append(server_socket)
-            print('Ready to receive messages from', sc.getpeername())
+            self.conexiones.append(server_socket)
+            print('Listo para recibir mensajes de:', sc.getpeername())
 
-    def broadcast(self, message, source):
-        """
-        Sends a message to all connected clients, except the source of the message.
-        Args:
-            message (str): The message to broadcast.
-            source (tuple): The socket address of the source client.
-        """
-        for connection in self.connections:
+    def transimitir(self, mensaje, fuente):
 
-            # Send to all connected clients except the source client
-            if connection.sockname != source:
-                connection.send(message)
+        for conexiones in self.conexiones:
 
-    def remove_connection(self, connection):
-        """
-        Removes a ServerSocket thread from the connections attribute.
-        Args:
-            connection (ServerSocket): The ServerSocket thread to remove.
-        """
-        self.connections.remove(connection)
+            if conexiones.socknombre != fuente:
+                conexiones.send(mensaje)
+
+    def remove_connection(self, conexion):
+        
+        self.conexiones.remove(conexion)
 
 
 class ServerSocket(threading.Thread):
-    """
-    Supports communications with a connected client.
-    Attributes:
-        sc (socket.socket): The connected socket.
-        sockname (tuple): The client socket address.
-        server (Server): The parent thread.
-    """
 
-    def __init__(self, sc, sockname, server):
+    def __init__(self, sc, socknombre, server):
         super().__init__()
         self.sc = sc
-        self.sockname = sockname
+        self.socknombre = socknombre
         self.server = server
 
     def run(self):
-        """
-        Receives data from the connected client and broadcasts the message to all other clients.
-        If the client has left the connection, closes the connected socket and removes itself
-        from the list of ServerSocket threads in the parent Server thread.
-        """
+ 
         while True:
             try:
-                message = self.sc.recv(1024).decode('utf-8')
-                if message:
-                    print('{} says {!r}'.format(self.sockname, message))
-                    self.server.broadcast(message, self.sockname)
+                mensaje = self.sc.recv(1024).decode('utf-8')
+                if mensaje:
+                    print('{} dice {!r}'.format(self.socknombre, mensaje))
+                    self.server.transimitir(mensaje, self.socknombre)
                 else:
-                    # Client has closed the socket, exit the thread
-                    print('{} has closed the connection'.format(self.sockname))
+                    print('{} a cerrado su conexion'.format(self.socknombre))
                     self.sc.close()
                     server.remove_connection(self)
                     return
             except:
                 print('error cuando kike se salio')
 
-    def send(self, message):
-        """
-        Sends a message to the connected server.
-        Args:
-            message (str): The message to be sent.
-        """
-        self.sc.sendall(message.encode('utf-8'))
+    def send(self, mensaje):
+
+        self.sc.sendall(mensaje.encode('utf-8'))
 
 
-def exit(server):
-    """
-    Allows the server administrator to shut down the server.
-    Typing 'q' in the command line will close all active connections and exit the application.
-    """
+def exit(servidor):
+
     while True:
         ipt = input('')
         if ipt == 'q':
-            print('Closing all connections...')
-            for connection in server.connections:
-                connection.sc.close()
-            print('Shutting down the server...')
+            print('Cerrando conexiones...')
+            for conexiones in servidor.conexiones:
+                conexiones.sc.close()
+            print('Apagando servidor...')
             os._exit(0)
 
 
 if __name__ == '__main__':
-    #parser = argparse.ArgumentParser(description='Chatroom Server')
-    #parser.add_argument('host', help='Interface the server listens at')
-    # parser.add_argument('-p', metavar='PORT', type=int, default=5555,
-    #                    help='TCP port (default 1060)')
-    #args = parser.parse_args()
 
-    # Create and start server thread
-    server = Server('96.126.114.57', 5555)
-    server.start()
+    servidor = Server('96.126.114.57', 5555)
+    servidor.start()
 
-    exit = threading.Thread(target=exit, args=(server,))
+    exit = threading.Thread(target=exit, args=(servidor,))
     exit.start()

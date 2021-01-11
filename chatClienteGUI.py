@@ -6,213 +6,153 @@ import sys
 import tkinter as tk
 
 
-class Send(threading.Thread):
-    """
-    Sending thread listens for user input from the command line.
-    Attributes:
-        sock (socket.socket): The connected socket object.
-        name (str): The username provided by the user.
-    """
-    def __init__(self, sock, name):
+class Enviar(threading.Thread):
+
+    def __init__(self, sock, nombre):
         super().__init__()
         self.sock = sock
-        self.name = name
+        self.nombre = nombre
 
     def run(self):
-        """
-        Listens for user input from the command line only and sends it to the server.
-        Typing 'QUIT' will close the connection and exit the application.
-        """
-        while True:
-            print('{}: '.format(self.name), end='')
-            sys.stdout.flush()
-            message = sys.stdin.readline()[:-1]
 
-            # Type 'QUIT' to leave the chatroom
-            if message == 'SALIR':
-                self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.name).encode('utf-8'))
-                break
-            
-            # Send message to server for broadcasting
+        while True:
+            print('{}: '.format(self.nombre), end='')
+            sys.stdout.flush()
+            mensaje = sys.stdin.readline()[:-1]
+
+            if mensaje == 'SALIR':
+                self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.nombre).encode('utf-8'))
+                break      
             else:
-                self.sock.sendall('{}: {}'.format(self.name, message).encode('utf-8'))
+                self.sock.sendall('{}: {}'.format(self.nombre, mensaje).encode('utf-8'))
         
         print('\nSaliendo...')
         self.sock.close()
         os._exit(0)
 
 
-class Receive(threading.Thread):
-    """
-    Receiving thread listens for incoming messages from the server.
-    Attributes:
-        sock (socket.socket): The connected socket object.
-        name (str): The username provided by the user.
-        messages (tk.Listbox): The tk.Listbox object containing all messages displayed on the GUI.
-    """
-    def __init__(self, sock, name):
+class Recibir(threading.Thread):
+
+    def __init__(self, sock, nombre):
         super().__init__()
         self.sock = sock
-        self.name = name
-        self.messages = None
+        self.nombre = nombre
+        self.mensajes = None
 
     def run(self):
-        """
-        Receives data from the server and displays it in the GUI.
-        Always listens for incoming data until either end has closed the socket.
-        """
         while True:
-            message = self.sock.recv(1024).decode('utf-8')
+            mensaje = self.sock.recv(1024).decode('utf-8')
 
-            if message:
+            if mensaje:
 
-                if self.messages:
-                    self.messages.insert(tk.END, message)
-                    # print('hi')
-                    # print('\r{}\n{}: '.format(message, self.name), end = '')
-                
+                if self.mensajes:
+                    self.mensajes.insert(tk.END, mensaje)
                 else:
-                    # Thread has started, but client GUI is not yet ready
-                    print('\r{}\n{}: '.format(message, self.name), end = '')
+                    print('\r{}\n{}: '.format(mensaje, self.nombre), end = '')
             
             else:
-                # Server has closed the socket, exit the program
                 print('\nOh no!, se perdio la conexion al servidor!')
                 print('\nSaliendo...')
                 self.sock.close()
                 os._exit(0)
 
-class Client:
-    """
-    Supports management of client-server connections and integration with the GUI.
-    Attributes:
-        host (str): The IP address of the server's listening socket.
-        port (int): The port number of the server's listening socket.
-        sock (socket.socket): The connected socket object.
-        name (str): The username of the client.
-        messages (tk.Listbox): The tk.Listbox object containing all messages displayed on the GUI.
-    """
-    def __init__(self, host, port):
+class Cliente:
+    def __init__(self, host, puerto):
         self.host = host
-        self.port = port
+        self.puerto = puerto
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.name = None
-        self.messages = None
+        self.nombre = None
+        self.mensajes = None
     
-    def start(self):
-        """
-        Establishes the client-server connection. Gathers user input for the username,
-        creates and starts the Send and Receive threads, and notifies other connected clients.
-        Returns:
-            A Receive object representing the receiving thread.
-        """
-        print('Intentando conectar a {}:{}...'.format(self.host, self.port))
-        self.sock.connect((self.host, self.port))
-        print('Conectado exitosamente a {}:{}'.format(self.host, self.port))
+    def iniciar(self):
+
+        print('Intentando conectar a {}:{}...'.format(self.host, self.puerto))
+        self.sock.connect((self.host, self.puerto))
+        print('Conectado exitosamente a {}:{}'.format(self.host, self.puerto))
         
         print()
-        self.name = input('Escribe tu Username: ')
+        self.nombre = input('Escribe tu nombre de usuario: ')
 
         print()
-        print('Bienvenido, {}! Preparando para enviar y recibir mensajes...'.format(self.name))
+        print('Bienvenido, {}! Preparando para enviar y recibir mensajes...'.format(self.nombre))
 
-        # Create send and receive threads
-        send = Send(self.sock, self.name)
-        receive = Receive(self.sock, self.name)
+        env = Enviar(self.sock, self.nombre)
+        rec = Recibir(self.sock, self.nombre)
 
-        # Start send and receive threads
-        send.start()
-        receive.start()
+        env.start()
+        rec.start()
 
-        self.sock.sendall('Servidor: {} ha entrado al chat. Di hola!'.format(self.name).encode('utf-8'))
+        self.sock.sendall('Servidor: {} ha entrado al chat. Di hola!'.format(self.nombre).encode('utf-8'))
         print("\rTodo listo! deja la sala escribiendo 'SALIR'\n")
-        print('{}: '.format(self.name), end = '')
+        print('{}: '.format(self.nombre), end = '')
 
-        return receive
+        return rec
 
-    def send(self, text_input):
-        """
-        Sends text_input data from the GUI. This method should be bound to text_input and 
-        any other widgets that activate a similar function e.g. buttons.
-        Typing 'QUIT' will close the connection and exit the application.
-        Args:
-            text_input(tk.Entry): A tk.Entry object meant for user text input.
-        """
-        message = text_input.get()
-        text_input.delete(0, tk.END)
-        self.messages.insert(tk.END, '{}: {}'.format(self.name, message))
+    def send(self, entrada_texto):
+ 
+        mensaje = entrada_texto.get()
+        entrada_texto.delete(0, tk.END)
+        self.mensajes.insert(tk.END, '{}: {}'.format(self.nombre, mensaje))
 
-        # Type 'QUIT' to leave the chatroom
-        if message == 'SALIR':
-            self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.name).encode('utf-8'))
+        if mensaje == 'SALIR':
+            self.sock.sendall('Servidor: {} ha salido del chat.'.format(self.nombre).encode('utf-8'))
             
             print('\nSaliendo...')
             self.sock.close()
             os._exit(0)
         
-        # Send message to server for broadcasting
         else:
-            self.sock.sendall('{}: {}'.format(self.name, message).encode('utf-8'))
+            self.sock.sendall('{}: {}'.format(self.nombre, mensaje).encode('utf-8'))
 
 
 def main():
-    """
-    Initializes and runs the GUI application.
-    Args:
-        host (str): The IP address of the server's listening socket.
-        port (int): The port number of the server's listening socket.
-    """
+    
     host = '96.126.114.57'
-    port = 5555
+    puerto = 5555
 
-    client = Client(host, port)
-    receive = client.start()
+    cliente = Cliente(host, puerto)
+    recibir = cliente.iniciar()
 
-    window = tk.Tk()
-    window.title('Chat4Telecom')
+    ventana = tk.Tk()
+    ventana.title('Chat4Telecom')
 
-    frm_messages = tk.Frame(master=window)
-    scrollbar = tk.Scrollbar(master=frm_messages)
-    messages = tk.Listbox(
-        master=frm_messages, 
+    frame_mensajes = tk.Frame(master=ventana)
+    scrollbar = tk.Scrollbar(master=frame_mensajes)
+    mensajes_grafico = tk.Listbox(
+        master=frame_mensajes, 
         yscrollcommand=scrollbar.set
     )
     scrollbar.pack(side=tk.RIGHT, fill=tk.Y, expand=False)
-    messages.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    mensajes_grafico.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
     
-    client.messages = messages
-    receive.messages = messages
+    cliente.mensajes = mensajes_grafico
+    recibir.mensajes = mensajes_grafico
 
-    frm_messages.grid(row=0, column=0, columnspan=2, sticky="nsew")
+    frame_mensajes.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-    frm_entry = tk.Frame(master=window)
-    text_input = tk.Entry(master=frm_entry)
-    text_input.pack(fill=tk.BOTH, expand=True)
-    text_input.bind("<Return>", lambda x: client.send(text_input))
-    text_input.insert(0, "Mensaje...")
+    frame_entrada = tk.Frame(master=ventana)
+    entrada_texto = tk.Entry(master=frame_entrada)
+    entrada_texto.pack(fill=tk.BOTH, expand=True)
+    entrada_texto.bind("<Return>", lambda x: cliente.send(entrada_texto ))
+    entrada_texto.insert(0, "Mensaje...")
 
     btn_send = tk.Button(
-        master=window,
+        master=ventana,
         text='Enviar',
-        command=lambda: client.send(text_input)
+        command=lambda: cliente.send(entrada_texto)
     )
 
-    frm_entry.grid(row=1, column=0, padx=10, sticky="ew")
+    frame_entrada.grid(row=1, column=0, padx=10, sticky="ew")
     btn_send.grid(row=1, column=1, pady=10, sticky="ew")
 
-    window.rowconfigure(0, minsize=300, weight=1)
-    window.rowconfigure(1, minsize=50, weight=0)
-    window.columnconfigure(0, minsize=400, weight=1)
-    window.columnconfigure(1, minsize=200, weight=0)
+    ventana.rowconfigure(0, minsize=300, weight=1)
+    ventana.rowconfigure(1, minsize=50, weight=0)
+    ventana.columnconfigure(0, minsize=400, weight=1)
+    ventana.columnconfigure(1, minsize=200, weight=0)
 
-    window.mainloop()
+    ventana.mainloop()
 
 
 if __name__ == '__main__':
-    #parser = argparse.ArgumentParser(description='Chat4Telecom')
-    #parser.add_argument('host', help='El servidor esta escuchando en:')
-    #parser.add_argument('-p', metavar='PORT', type=int, default=5555,
-                        #help='TCP port (default 1060)')
-    #args = parser.parse_args()
 
     main()

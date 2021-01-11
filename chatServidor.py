@@ -17,7 +17,6 @@ class Server:
         self.sock.bind((host, puerto))
         self.sock.listen(100)
 
-        #print('Corriendo en el host: '+str(host))
         print('Corriendo en el puerto: '+str(puerto))
 
         self.usuarios_chat = {}
